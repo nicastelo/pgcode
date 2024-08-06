@@ -23,15 +23,15 @@ $(function () {
 
 
         //Scene globals
-        var camera, cameraControls,cameraLight; 
-        var scene, renderer; 
+        var camera, cameraControls,cameraLight;
+        var scene, renderer;
         var gcodeProxy;//used to display loaded gcode.
 
         var camera2d;
 
         var nozzleModel;
         var extrudingLineGroup;
-        
+
         var clock;
         var sceneBounds = new THREE.Box3();
         //todo. Are these needed?
@@ -45,7 +45,7 @@ $(function () {
         var curGcodePath="";
 
         var forceNoSync=false;//used to override sync when user drags slider. Todo. Better way to handle this?
-        
+
         var simPlaying =true;
         var playbackRate=1.0;
 
@@ -59,7 +59,7 @@ $(function () {
 
         //handles fps display
         const stats = new Stats();
-        
+
         var printerConnection=null;
         var camera2dDragging=false;
         var camera2dLastPos=null;
@@ -78,9 +78,9 @@ $(function () {
         });
         $('#layer-slider').on('input', function (e) {
             if(parseInt(e.currentTarget.value))
-            {    
+            {
                 currentLayerNumber=parseInt(e.currentTarget.value)
-                
+
                 //todo. this seems hacky. better way?
                 //currentCalculatedLayer=currentCalculatedLayer;
             }
@@ -101,7 +101,7 @@ $(function () {
         $('#pgc2dcanvas').on('mouseleave', function (e) {
             //console.log("mu")
             //camera2dDragging=false;
-        });        
+        });
         $('body').on('mousemove', function (e) {
             if(camera2dDragging && camera2dLastPos!=null)
             {
@@ -123,7 +123,7 @@ $(function () {
                     localStorage.setItem('pgcCameraPos2d',camStr);
                 };
             }
-        });        
+        });
         $('#pgc2dcanvas').on('wheel', function (e) {
 
             camera2d.zoom +=  Math.sign(e.originalEvent.wheelDelta )/10
@@ -139,7 +139,7 @@ $(function () {
             };
             //console.log(e)
         });
-  
+
 
         $('#play-button').on('click', function (e) {
             simPlaying=!simPlaying;
@@ -154,13 +154,13 @@ $(function () {
             playbackRate=playbackRate*2;
             if(playbackRate>64)
                 playbackRate=64;
-        });           
+        });
         $('#slower-button').on('click', function (e) {
             playbackRate=playbackRate/2;
             if(playbackRate<0.125)
                 playbackRate=0.125;
-        });           
-            
+        });
+
 
 
         var bedVolume = undefined;
@@ -171,7 +171,7 @@ $(function () {
             //get new build volume.
             updateBedVolume();
             //update scene if any
-            updateGridMesh(); 
+            updateGridMesh();
 
             //Needed in case center has changed.
             resetCamera();
@@ -205,11 +205,11 @@ $(function () {
                         uploadGcode(files[0])
                         //            /*UPLOAD FILES HERE*/
                         //upload(e.originalEvent.dataTransfer.files);
-                    }   
+                    }
                 }
             }
         );
-                 
+
         function uploadGcode(file){
             forceDisconnect=true;
             updateJob(file)
@@ -251,7 +251,7 @@ $(function () {
                         localStorage.setItem("pgcApiKey",pgcApiKey);
                 }else{
                     localStorage.removeItem("pgcServer",null);
-                    localStorage.removeItem("pgcApiKey",null);                            
+                    localStorage.removeItem("pgcApiKey",null);
                 }
 
                 //always autoconnect for now.
@@ -261,9 +261,9 @@ $(function () {
                 //     localStorage.setItem("pgcAutoConnect",true);
                 // }else{
                 //     localStorage.setItem("pgcAutoConnect",false);
-                // }  
-                
-                
+                // }
+
+
                 //alert( JSON.stringify(data) );
                 $("#connect-dialog").hide()
                 window.location.reload();
@@ -275,16 +275,16 @@ $(function () {
                 dat.GUI.TEXT_OPEN="View Options"
                 dat.GUI.TEXT_CLOSED="View Options"
                 gui = new dat.GUI({ autoPlace: false,name:"View Options",closed:false,closeOnTop:true,useLocalStorage:true });
-    
+
                 //Override default storage location to fix bug with tabs.
                 //Not working
                 //gui.setLocalStorageHash("PrettyGCodeSettings");
 
                 gui.useLocalStorage=true;
                 // var guielem = $("<div id='mygui' style='position:absolute;right:95px;top:20px;opacity:0.8;z-index:5;'></div>");
-    
+
                 // $('.gwin').prepend(guielem)
-    
+
                 $('#mygui').append(gui.domElement);
 
                 gui.remember(pgSettings);
@@ -305,7 +305,7 @@ $(function () {
                 }else{
                     $('#pgc2dcanvas').hide()
                 }
-                
+
                 //gui.add(pgSettings, 'showMirror').onFinishChange(pgSettings.reloadGcode);
                 gui.add(pgSettings, 'orbitWhenIdle');
                 gui.add(pgSettings, 'showTravel');
@@ -323,21 +323,21 @@ $(function () {
                 //     });
 
                 gui.add(pgSettings, 'showNozzle');
-                    
+
                 //gui.add(pgSettings, 'reloadGcode');
                 gui.add(pgSettings, 'lightTheme').onFinishChange(function(){
                     if(pgSettings.lightTheme)
                         myScene.background = new THREE.Color(0xd0d0d0);
                     else
                         myScene.background = null;//new THREE.Color(0xd0d0d0);
-                    
+
                 });
 
                 gui.add(pgSettings, 'saveCamera');
 
                 //todo handle finish change for this
                 gui.add(pgSettings, 'perspectiveCamera');
-                
+
 
                 var folder = gui.addFolder('Windows');//hidden.
                 // folder.add(pgSettings, 'showState').onFinishChange(updateWindowStates).listen();
@@ -352,7 +352,7 @@ $(function () {
                     $("#mygui").toggleClass("pghidden");
                 });
 
-            } 
+            }
         }
 
 
@@ -361,7 +361,7 @@ $(function () {
                 viewInitialized = true;
 
                 updateBedVolume();
-              
+
                 initGui()
 
                 printerConnection=new PrinterConnection()
@@ -376,7 +376,7 @@ $(function () {
                             $(".pgconnection").addClass("connected")
                     }else{
                         if($(".pgconnection").hasClass("connected"))
-                            $(".pgconnection").removeClass("connected")                        
+                            $(".pgconnection").removeClass("connected")
                     }
                     $("#status-state").html(newState.state)
                     $("#status-elapsed").html(new Date(newState.printTime * 1000).toISOString().substr(11, 8))
@@ -387,7 +387,7 @@ $(function () {
                     //todo. find another place for this?
                     if(gcodeProxy)
                         $("#status-layer").html(currentCalculatedLayer.toString()+"/"+gcodeProxy.getLayerCount())
-    
+
                     if(curGcodePath!=newState.gcodePath && newState.gcodeName!="")
                     {
                         curGcodePath=newState.gcodePath;
@@ -414,16 +414,20 @@ $(function () {
                     if(pgcAutoConnect==null)//default to autoconnect
                         pgcAutoConnect=true;
                     if(pgcServer==null){
-                        pgcServer=document.location.protocol+"//"+document.location.hostname+":"+defaultMoonrakerPort
-                        console.log("No server configured. Trying default:"+pgcServer)
-                        if(pgcServer.startsWith("file")){
-                            pgcServer='http://fluiddpi.local:'+defaultMoonrakerPort;
-                            console.log("Running from file. Setting file_url:"+pgcServer)
+                        if (document.location.protocol == "http:") {
+                            pgcServer = document.location.protocol + "//" + window.location.host
+                        } else {
+                            pgcServer=document.location.protocol+"//"+document.location.hostname+":"+defaultMoonrakerPort
+                            console.log("No server configured. Trying default:"+pgcServer)
+                            if(pgcServer.startsWith("file")){
+                                pgcServer='http://fluiddpi.local:'+defaultMoonrakerPort;
+                                console.log("Running from file. Setting file_url:"+pgcServer)
+                            }
                         }
                     }else{
                         console.log("Configured server:"+pgcServer)
                     }
-                
+
                     let searchParams = new URLSearchParams(window.location.search)
                     if(searchParams.has('server')){
                         pgcServer=searchParams.get("server")
@@ -435,7 +439,7 @@ $(function () {
                     if(pgcServer && pgcAutoConnect){
                         //printerConnection.connectToOctoprint(pgcServer,pgcApiKey)
                         printerConnection.detectConnection(pgcServer,pgcApiKey)
-                        
+
                     }
                 }
                 initThree();
@@ -446,13 +450,13 @@ $(function () {
                     stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
                     $("body").append( stats.dom );
                 }
-                
+
 
                 //detectConnection();
 
                 //connectToOctoprint()
                 //connectToMoonraker();
-                
+
                 //GCode loader.
                 // gcodeProxy = new GCodeObject2();
                 // var gcodeObject = gcodeProxy.getObject();
@@ -461,20 +465,20 @@ $(function () {
 
                 // if(curJobName!="")
                 //     gcodeProxy.loadGcode('/downloads/files/local/' + curJobName);
-                    
+
                 //gcodeProxy.loadGcode('http://fluiddpi.local/server/files/gcodes/' + 'CCR10_xyzCalibration_cube.gcode?xx=1');
                 //gcodeProxy.loadGcode('http://fluiddpi.local/server/files/gcodes/' + 'CCR10_3DBenchy-FAST.gcode?xx=1');
 
 
-                    
+
             }
-        }; 
+        };
 
 
         function resizeCanvasToDisplaySize() {
             const canvas = renderer.domElement;
             // look up the size the canvas is being displayed
-            const width = canvas.clientWidth; 
+            const width = canvas.clientWidth;
             const height = canvas.clientHeight;
 
             // adjust displayBuffer size to match
@@ -486,7 +490,7 @@ $(function () {
                 gcodeWid = width;
                 gcodeHei = height;
                 cameraControls.setViewport(0, 0, width, height);
-                return true;//update needed. 
+                return true;//update needed.
             }
             return false;//no update needed
         }
@@ -521,7 +525,7 @@ $(function () {
             else
                 camera2d.position.set(0, 0, 500);;
 
-            
+
 
             var canvas = $("#pgccanvas");
             cameraControls = new CameraControls(camera, canvas[0]);
@@ -569,7 +573,7 @@ $(function () {
             cameraLight.position.copy(camera.position);
             scene.add(cameraLight);
 
-            //Semi-transparent plane to represent the bed. 
+            //Semi-transparent plane to represent the bed.
             updateGridMesh();
 
 
@@ -579,7 +583,7 @@ $(function () {
 
             //material for fatline highlighter
             var highlightMaterial = undefined;
-                        
+
             if(pgSettings.fatLines)
             {
                 highlightMaterial=new THREE.LineMaterial({
@@ -618,7 +622,7 @@ $(function () {
                     nozzleModel=obj;
                     scene.add( nozzleModel );
                 });
-                    
+
             }else{
                 var nozzleGroup = new THREE.Group();
                 //let geometry = new THREE.ConeGeometry( 5, 6, 32 );
@@ -647,12 +651,12 @@ $(function () {
                     color: new THREE.Color(0xba971b),
                     flatShading:false,
                     transparent:true,
-                    opacity:0.50                    
+                    opacity:0.50
                 } );
                 let nut =new THREE.Mesh( geometry, nutMaterial );
                 nut.rotation.x = -Math.PI / 2;
                 nut.position.z = 5;
-                
+
 
                 nozzleGroup.add(cone)
                 nozzleGroup.add(nut)
@@ -671,9 +675,9 @@ $(function () {
                 color: new THREE.Color("red"),
                 emissive:new THREE.Color("blue")
                 //flatShading:true,
-            } );                
+            } );
 
-                
+
             let extrudingLine =new THREE.Mesh( geometry, extrudingLineMaterial );
             //extrudingLine.position.y = -1;
             extrudingLine.scale.y=2;
@@ -683,7 +687,7 @@ $(function () {
             extrudingLineGroup.add(extrudingLine)
 
             scene.add( extrudingLineGroup );
-                
+
             function animate() {
 
                 stats.begin();
@@ -734,7 +738,7 @@ $(function () {
                     //console.log(fpDelta)
 
                 }
-                if(curPrinterState && (curPrinterState.startsWith("printing") || curPrinterState=="paused") && 
+                if(curPrinterState && (curPrinterState.startsWith("printing") || curPrinterState=="paused") &&
                     pgSettings.syncToProgress && (!forceNoSync))
 //if(!forceNoSync || )
                 {
@@ -742,7 +746,7 @@ $(function () {
                     {
                         var curState=printHeadSim.getCurPosition();
                         nozzleModel.position.copy(curState.position);
-                        
+
                         //Position a cylinder to represent the segment being extruding
                         if(extrudingLineGroup && curState.startPoint)
                         {
@@ -753,7 +757,7 @@ $(function () {
                                 var vectToCurEnd=curState.position.clone().sub(curState.startPoint);
                                 var dist=vectToCurEnd.length();
                                 if(dist<0.0001)
-                                {    
+                                {
                                     dist=0.0001; //fix 0 distance bug.
                                     //console.log("here")
                                 }
@@ -761,10 +765,10 @@ $(function () {
                                 extrudingLineGroup.position.copy(curState.startPoint);
 
                                 vectToCurEnd.setLength(dist/2);
-                                extrudingLineGroup.position.add(vectToCurEnd);  
+                                extrudingLineGroup.position.add(vectToCurEnd);
                                 extrudingLineGroup.lookAt(curState.position);
                             }
-                        }    
+                        }
                         needRender=true;
                     }
                     if(gcodeProxy)
@@ -816,7 +820,7 @@ $(function () {
 
                 if(highlightMaterial!==undefined){
                     //fake a glow by ramping the diffuse color.
-                    let nv = 0.5+((Math.sin(elapsed*4)+1)/4.0); 
+                    let nv = 0.5+((Math.sin(elapsed*4)+1)/4.0);
                     nv=1.0;
                     highlightMaterial.uniforms.diffuse.value.r=nv;
                     highlightMaterial.uniforms.diffuse.value.g=nv;
@@ -850,7 +854,7 @@ $(function () {
                 {
                     cameraLight.position.copy(camera.position);
                 }
-                
+
                 if(resizeCanvasToDisplaySize())
                     needRender=true;
 
@@ -867,7 +871,7 @@ $(function () {
 
                     renderer.setScissor( 0, 0, window.innerWidth, window.innerHeight );
                     renderer.render(scene, camera);
-                    
+
 
                     if(pgSettings.show2d){
                         width=window.innerWidth/4
@@ -949,12 +953,12 @@ $(function () {
                     //console.log(["Pause ",playbackRate,lDelta,fpDelta])
                     playbackRate=0;//just pause if still under
                 }
-                else 
+                else
                 if(fpDelta>500)
                 {
                     playbackRate=0.9+(fpDelta/1000.0);
                     //console.log(["Slow ",playbackRate,lDelta,fpDelta])
-                }else 
+                }else
                 if(fpDelta<200 && fpDelta>0)
                 {
                     playbackRate=0.5-(1.0/fpDelta);
@@ -962,14 +966,14 @@ $(function () {
                 }else{
                     //console.log(["OK ",playbackRate,lDelta,fpDelta])
 
-                }             
-                
+                }
+
                 if(playbackRate<0)
                     playbackRate=0;
                 if(playbackRate>100)
-                    playbackRate=100;                    
+                    playbackRate=100;
 
-            }, 500);  
+            }, 500);
 
         }
         //startPlaybackAdjuster()
@@ -1007,7 +1011,7 @@ $(function () {
                 lastFilePos=curPrintFilePos;
 
 
-            }, interval);  
+            }, interval);
 
         }
         //let searchParams = new URLSearchParams(window.location.search)
@@ -1016,7 +1020,7 @@ $(function () {
 
         function resetCamera() {
 
-            if(!cameraControls)//Make sure controls exist. 
+            if(!cameraControls)//Make sure controls exist.
                 return;
 
             if (bedVolume.origin == "lowerleft")
@@ -1090,9 +1094,9 @@ $(function () {
             var existingGrid = scene.getObjectByName("grid");
             if(existingGrid)
                 scene.remove( existingGrid );
-                
+
             //console.log([existingPlane,existingGrid]);
-            
+
             var planeGeometry = new THREE.PlaneGeometry(bedVolume.width, bedVolume.depth);
             var planeMaterial = new THREE.MeshBasicMaterial({
             color: 0x909090,
@@ -1107,7 +1111,7 @@ $(function () {
                 plane.position.set(bedVolume.width / 2, bedVolume.depth / 2, -0.1);
             //plane.quaternion.setFromEuler(new THREE.Euler(- Math.PI / 2, 0, 0));
             scene.add(plane);
-            //make bed sized grid. 
+            //make bed sized grid.
             var grid = new THREE.GridHelper(bedVolume.width, bedVolume.depth / 10, 0x000000, 0x888888);
             grid.name="grid";
             //todo handle other than lowerleft
@@ -1122,10 +1126,10 @@ $(function () {
         //currently loaded gcode
         var curJobName="";
         var durJobDate=0;//use date of file to check for update.
-        
+
         //rename to loadGcode or something.
         function updateJob(job,apiKey){
-            
+
             if(job instanceof File)
             {
                 if(viewInitialized){
@@ -1158,7 +1162,7 @@ $(function () {
                     {
                         curJobName=job
 
-                        
+
                         if(currentLayerCopy)
                             myScene.remove(currentLayerCopy)
                         currentLayerCopy=null;

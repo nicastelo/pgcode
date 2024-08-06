@@ -2,7 +2,7 @@
 PrettyGCode WebGL based GCode preview and simulator
 
 # Features
-- 3D WebGL preview of GCode 
+- 3D WebGL preview of GCode
 - Tested with desktop Chrome, Firefox, Edge and Safari. Works on mobile browsers if the GCode isn't too large.
 - Sync to Klipper/Moonraker/Fluidd print jobs in real time
 - Compatible with OBS Studio browser for easy Streaming (requires command line flag)
@@ -24,28 +24,13 @@ Port can be set as part of installation. Default port is 7136
 # Moonraker config
 Depending on your setup you will probably have to edit Moonraker.conf to allow access. This can be done in Fluidd in the Configuration menu.
 
-- Check to see if authorization is enabled or not. If it is you will need to use an API key. 
-- You will also have to allow PrettyGCode access in the cors_domains: section. Check that the machine AND port you are browsing from is included in the cors_domains and/or trusted_clients sections. 
+- Check to see if authorization is enabled or not. If it is you will need to use an API key.
+- You will also have to allow PrettyGCode access in the cors_domains: section. Check that the machine AND port you are browsing from is included in the cors_domains and/or trusted_clients sections.
 - You _may_ also have to turn on octoprint_compat. This allows auto detection of connections.
 
 Partial moonraker.conf
 ```
-[authorization]#<--If this section is present then PrettyGCode needs to use an API Key to connect
-cors_domains:
-  *.local
-  *.lan
-  *://app.fluidd.xyz
-  *:7136  #<--Allow PrettyGCode (port 7136) on all domains (recommended) OR...
-  *.local:7136  #<--Allow PrettyGCode (port 7136) on just .*local domain. (more secure I guess)
-
-trusted_clients:
-    10.0.0.0/8
-    127.0.0.0/8
-    169.254.0.0/16
-    172.16.0.0/12
-    192.168.1.0/160  #<--Trust local network machines. Only needed if [authorization] enabled.
-    FE80::/10
-    ::1/128
+[authorization] # <--If this section is present then PrettyGCode needs to use an API Key to connect
 
 # enables support for slicer uploads via partial Octoprint API impl
 [octoprint_compat]
@@ -54,10 +39,11 @@ trusted_clients:
 [update_manager pgcode]
 type: git_repo
 primary_branch: main
-origin: https://github.com/Kragrathea/pgcode.git
+origin: https://github.com/nicastelo/pgcode.git
 path: ~/pgcode
 is_system_service: False
 ```
+
 # Fluidd config
 If you haven't already you may have to enable SD support in Fluidd
 
@@ -69,17 +55,17 @@ path: ~/gcode_files
 
 # Connecting to Fluidd/Moonraker
 
-Assuming you installed on a machine with a local name of "fluiddpi" you can access the PrettyGCode page by using this url. 
+Assuming you installed on a machine with a local name of "fluiddpi" you can access the PrettyGCode page by using this url.
 
-http://fluiddpi.local:7136 <-Should automatically connect to the local instance of Fluidd
+http://fluiddpi.local:7136 <- Should automatically connect to the local instance of Fluidd
 
 If you installed to some other machine subsititute the ip address or name.
 
-The above URL should take you to the PrettyGCode home page. If don't have your printer machine set to require login it should automatically connect. If you have your system secured you will have to use an API key to allow access. To configure the connection to the printer click on the connection button in the upper right of the screen. There you can enter your server address and any API key. 
+The above URL should take you to the PrettyGCode home page. If don't have your printer machine set to require login it should automatically connect. If you have your system secured you will have to use an API key to allow access. To configure the connection to the printer click on the connection button in the upper right of the screen. There you can enter your server address and any API key.
 ![Screen2](https://raw.githubusercontent.com/Kragrathea/pgcode/main/img/pgc_screen2.jpg)
 
  # Using an API key to connect
-If you have Moonraker secured behind a user name and password then you can use an API key to allow PrettyGCode to connect. 
+If you have Moonraker secured behind a user name and password then you can use an API key to allow PrettyGCode to connect.
 
 You can get your API key in Fluidd via the System configuration menu
 ![Screen1](https://raw.githubusercontent.com/Kragrathea/pgcode/main/img/pgc_apikeylocation.jpg)
@@ -122,15 +108,15 @@ NOTE: For now URLS must be in the format http://servername:port without any trai
 Specify the API key in the URL like this:
 
 http://fluiddpi.local:7136?apiKey=<moonraker api key>
- 
+
 or
 http://fluiddpi.local:7136?server=http://fluiddpi.local:7125&apiKey=<moonraker api key>
-     
+
 # Setting printer bed volume
-By default the bed volume is 300x300 with the origin at the corner. If that doesn't match your printer you can adjust it via a URL parameter. Supported origins are currently, "center" and "lowerleft"      
+By default the bed volume is 300x300 with the origin at the corner. If that doesn't match your printer you can adjust it via a URL parameter. Supported origins are currently, "center" and "lowerleft"
 
 For example this will set a 200x200 volume with the origin at the "center"
-     
+
 http://fluiddpi.local:7136?bed.width=200&bed.depth=200&bed.origin=center
 
 # Options:
@@ -154,7 +140,7 @@ To make the background transparent in OBS Studio paste this CSS in the Browser s
 
 ```
 body { background-color: rgba(110, 0, 0, 0); margin: 0px auto; overflow: hidden; }
-canvas {background-color:rgba(0,0,0,0.5) !important; }  
+canvas {background-color:rgba(0,0,0,0.5) !important; }
 ```
 
 
